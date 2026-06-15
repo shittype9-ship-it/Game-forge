@@ -22,7 +22,7 @@ A modern, web-based game creation platform that empowers creators to build stunn
 gameforge/
 ├── packages/
 │   ├── frontend/     # React editor UI
-���   ├── backend/      # Node.js API server
+│   ├── backend/      # Node.js API server
 │   └── engine/       # Game engine core
 ├── docker-compose.yml
 ├── package.json
