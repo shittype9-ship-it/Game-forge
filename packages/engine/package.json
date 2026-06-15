@@ -1,0 +1,27 @@
+{
+  "name": "gameforge-engine",
+  "version": "1.0.0",
+  "description": "GameForge game engine core",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^6.31.0",
+    "@babylonjs/materials": "^6.31.0",
+    "@babylonjs/gui": "^6.31.0",
+    "@react-three/fiber": "^8.14.5",
+    "@react-three/drei": "^9.88.12",
+    "three": "^r156",
+    "@react-three/rapier": "^1.2.0",
+    "rapier3d-compat": "^0.11.2",
+    "rapier2d-compat": "^0.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3"
+  }
+}
