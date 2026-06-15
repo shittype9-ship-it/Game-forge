@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gameforge-db
+    environment:
+      POSTGRES_DB: gameforge
+      POSTGRES_USER: gameforge
+      POSTGRES_PASSWORD: gameforge_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gameforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    container_name: gameforge-backend
+    environment:
+      DATABASE_URL: postgresql://gameforge:gameforge_dev_password@postgres:5432/gameforge
+      JWT_SECRET: dev_secret_key_change_in_production
+      PORT: 5000
+      NODE_ENV: development
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "5000:5000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./packages/backend/src:/app/src
+      - ./packages/backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile
+    container_name: gameforge-frontend
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./packages/frontend/src:/app/src
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: gameforge-network
