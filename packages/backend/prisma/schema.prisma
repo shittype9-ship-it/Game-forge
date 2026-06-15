@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  username  String     @unique
+  password  String
+  avatar    String?
+  bio       String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  verified  Boolean    @default(false)
+  verificationToken String?
+  
+  projects  Project[]
+  scenes    Scene[]
+  assets    Asset[]
+}
+
+model Project {
+  id        String     @id @default(cuid())
+  name      String
+  description String?
+  mode      String     @default("2D") // "2D" or "3D"
+  thumbnail String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  published Boolean    @default(false)
+  
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  scenes    Scene[]
+  assets    Asset[]
+  builds    Build[]
+}
+
+model Scene {
+  id        String     @id @default(cuid())
+  name      String
+  order     Int        @default(0)
+  data      Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  
+  gameObjects GameObject[]
+}
+
+model GameObject {
+  id        String     @id @default(cuid())
+  name      String
+  type      String     // "sprite", "mesh", "camera", "light", etc.
+  position  Float[]    @default([0, 0, 0])
+  rotation  Float[]    @default([0, 0, 0])
+  scale     Float[]    @default([1, 1, 1])
+  data      Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  sceneId   String
+  scene     Scene      @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+  
+  parentId  String?
+  parent    GameObject? @relation("ChildObjects", fields: [parentId], references: [id], onDelete: SetNull)
+  children  GameObject[] @relation("ChildObjects")
+  
+  components Component[]
+}
+
+model Component {
+  id        String     @id @default(cuid())
+  type      String     // "transform", "rigidbody", "collider", etc.
+  data      Json       @default("{}")
+  enabled   Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  gameObjectId String
+  gameObject   GameObject @relation(fields: [gameObjectId], references: [id], onDelete: Cascade)
+}
+
+model Asset {
+  id        String     @id @default(cuid())
+  name      String
+  type      String     // "sprite", "model", "audio", "font", etc.
+  url       String
+  mimeType  String
+  size      Int
+  metadata  Json       @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+model Build {
+  id        String     @id @default(cuid())
+  version   Int        @default(1)
+  platform  String     // "web", "desktop", "mobile"
+  status    String     @default("pending") // "pending", "building", "success", "failed"
+  url       String?
+  error     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  
+  projectId String
+  project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
